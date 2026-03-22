@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Updates</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --brand: #0d6efd;
+      --bg: #f4f6fb;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .navbar-brand { font-weight: 700; font-size: 1.4rem; letter-spacing: .5px; }
+
+    .section-card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+      border-left: 4px solid var(--brand);
+      padding-left: .6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── News ── */
+    .news-item {
+      border-left: 3px solid var(--brand);
+      padding: .75rem 1rem;
+      background: #fff;
+      border-radius: 0 10px 10px 0;
+      margin-bottom: .9rem;
+    }
+
+    .news-item .news-title {
+      font-weight: 600;
+      font-size: .95rem;
+      color: #1a1a2e;
+      margin-bottom: .3rem;
+    }
+
+    .news-item .news-meta {
+      font-size: .78rem;
+      color: #888;
+      margin-bottom: .4rem;
+    }
+
+    .news-item .news-body {
+      font-size: .88rem;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .news-item .news-link {
+      font-size: .82rem;
+      text-decoration: none;
+      color: var(--brand);
+    }
+
+    .news-item .news-link:hover { text-decoration: underline; }
+
+    /* ── Market ── */
+    .asset-card {
+      border: none;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 1px 8px rgba(0,0,0,.07);
+      padding: 1rem;
+      height: 100%;
+    }
+
+    .asset-name {
+      font-weight: 700;
+      font-size: .95rem;
+      color: #333;
+    }
+
+    .asset-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: .15rem 0;
+    }
+
+    .badge-up   { background: #d4edda; color: #155724; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
+    .badge-down { background: #f8d7da; color: #721c24; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
+    .badge-flat { background: #e2e3e5; color: #383d41; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
+
+    .chart-container { position: relative; height: 130px; margin-top: .6rem; }
+
+    #market-spinner, #news-spinner { display: none; }
+
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      padding: 2rem 0;
+      font-size: .95rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-primary mb-4">
+  <div class="container">
+    <span class="navbar-brand">&#128200; Market Updates</span>
+  </div>
+</nav>
+
+<div class="container pb-5">
+  <div class="row g-4">
+
+    <!-- ════════════════ LEFT: NEWS ════════════════ -->
+    <div class="col-lg-5">
+      <div class="card section-card p-4 h-100">
+        <h5 class="section-title">Top 5 News</h5>
+
+        <div class="input-group mb-3">
+          <input id="news-topic" type="text" class="form-control"
+                 placeholder="Enter a topic (e.g. AI, Bitcoin, Fed…)"
+                 onkeydown="if(event.key==='Enter') fetchNews()" />
+          <button class="btn btn-primary" onclick="fetchNews()">Search</button>
+        </div>
+
+        <div id="news-spinner" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Fetching news…</div>
+        </div>
+
+        <div id="news-error" class="alert alert-danger d-none"></div>
+
+        <div id="news-results">
+          <div class="empty-state">Enter a topic above to see the latest news.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ RIGHT: MARKET ════════════════ -->
+    <div class="col-lg-7">
+      <div class="card section-card p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="section-title mb-0">Daily Market Overview</h5>
+          <button class="btn btn-sm btn-outline-primary" onclick="fetchMarket()">&#8635; Refresh</button>
+        </div>
+
+        <div id="market-spinner" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Loading market data…</div>
+        </div>
+
+        <div id="market-error" class="alert alert-danger d-none"></div>
+
+        <div id="market-results">
+          <div class="empty-state">Click <strong>Refresh</strong> to load today's market data.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ─────────── NEWS ─────────── */
+async function fetchNews() {
+  const topic = document.getElementById('news-topic').value.trim();
+  if (!topic) return;
+
+  setNewsState('loading');
+
+  try {
+    const res  = await fetch('/api/news', {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify({topic}),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setNewsState('error', data.error || 'Unknown error');
+      return;
+    }
+
+    renderNews(data.articles);
+  } catch (e) {
+    setNewsState('error', 'Network error – please try again.');
+  }
+}
+
+function renderNews(articles) {
+  const el = document.getElementById('news-results');
+  document.getElementById('news-spinner').style.display = 'none';
+  document.getElementById('news-error').classList.add('d-none');
+
+  if (!articles || articles.length === 0) {
+    el.innerHTML = '<div class="empty-state">No articles found.</div>';
+    return;
+  }
+
+  el.innerHTML = articles.map((a, i) => {
+    const bullets = summariseToBullets(a.body);
+    const date    = a.date ? `<span class="me-2">${a.date.slice(0,10)}</span>` : '';
+    const src     = a.source ? `<span>${a.source}</span>` : '';
+    return `
+      <div class="news-item">
+        <div class="news-title">${i+1}. ${escHtml(a.title)}</div>
+        <div class="news-meta">${date}${src}</div>
+        <ul class="news-body mb-1">${bullets}</ul>
+        <a class="news-link" href="${escHtml(a.url)}" target="_blank" rel="noopener">
+          &#128279; Read full article
+        </a>
+      </div>`;
+  }).join('');
+}
+
+function summariseToBullets(body) {
+  if (!body) return '<li>No summary available.</li>';
+  // Split on sentence boundaries, keep up to 3 meaningful sentences as bullets
+  const sentences = body.match(/[^.!?]+[.!?]+/g) || [body];
+  return sentences
+    .slice(0, 3)
+    .map(s => `<li>${escHtml(s.trim())}</li>`)
+    .join('');
+}
+
+function setNewsState(state, msg) {
+  const spinner = document.getElementById('news-spinner');
+  const errEl   = document.getElementById('news-error');
+  const results = document.getElementById('news-results');
+
+  spinner.style.display = 'none';
+  errEl.classList.add('d-none');
+
+  if (state === 'loading') {
+    spinner.style.display = 'block';
+    results.innerHTML = '';
+  } else if (state === 'error') {
+    errEl.textContent = msg;
+    errEl.classList.remove('d-none');
+  }
+}
+
+/* ─────────── MARKET ─────────── */
+const chartInstances = {};
+
+async function fetchMarket() {
+  const spinner = document.getElementById('market-spinner');
+  const errEl   = document.getElementById('market-error');
+  const results = document.getElementById('market-results');
+
+  spinner.style.display = 'block';
+  errEl.classList.add('d-none');
+  results.innerHTML = '';
+
+  // Destroy existing charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+  Object.keys(chartInstances).forEach(k => delete chartInstances[k]);
+
+  try {
+    const res  = await fetch('/api/market');
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = data.error || 'Failed to load market data.';
+      errEl.classList.remove('d-none');
+      spinner.style.display = 'none';
+      return;
+    }
+
+    spinner.style.display = 'none';
+    renderMarket(data.assets);
+  } catch (e) {
+    spinner.style.display = 'none';
+    errEl.textContent = 'Network error – please try again.';
+    errEl.classList.remove('d-none');
+  }
+}
+
+function renderMarket(assets) {
+  const results = document.getElementById('market-results');
+
+  const cards = assets.map(a => {
+    const cid = `chart-${a.ticker.replace(/[^a-z0-9]/gi,'_')}`;
+
+    if (a.error) {
+      return `
+        <div class="col-sm-6 col-xl-4">
+          <div class="asset-card">
+            <div class="asset-name">${escHtml(a.name)}</div>
+            <div class="text-muted small">Data unavailable</div>
+          </div>
+        </div>`;
+    }
+
+    const pct   = a.pct_change;
+    const arrow = pct === null ? '' : (pct >= 0 ? '▲' : '▼');
+    const cls   = pct === null ? 'badge-flat' : (pct >= 0 ? 'badge-up' : 'badge-down');
+    const pctTxt = pct === null ? 'N/A' : `${arrow} ${Math.abs(pct)}%`;
+
+    const latestFmt = formatValue(a.latest, a.ticker);
+
+    return `
+      <div class="col-sm-6 col-xl-4">
+        <div class="asset-card">
+          <div class="asset-name">${escHtml(a.name)}</div>
+          <div class="asset-value">${latestFmt}</div>
+          <span class="${cls}">${pctTxt} today</span>
+          <div class="chart-container">
+            <canvas id="${cid}"></canvas>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  results.innerHTML = `<div class="row g-3">${cards}</div>`;
+
+  // Draw charts after DOM update
+  assets.forEach(a => {
+    if (a.error || !a.prices || a.prices.length === 0) return;
+
+    const cid  = `chart-${a.ticker.replace(/[^a-z0-9]/gi,'_')}`;
+    const canvas = document.getElementById(cid);
+    if (!canvas) return;
+
+    const up    = a.pct_change === null || a.pct_change >= 0;
+    const color = up ? '#198754' : '#dc3545';
+    const fill  = up ? 'rgba(25,135,84,.12)' : 'rgba(220,53,69,.12)';
+
+    chartInstances[cid] = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels:   a.timestamps,
+        datasets: [{
+          data:            a.prices,
+          borderColor:     color,
+          backgroundColor: fill,
+          borderWidth:     2,
+          pointRadius:     0,
+          fill:            true,
+          tension:         0.3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: {
+            label: ctx => formatValue(ctx.parsed.y, a.ticker),
+          }
+        }},
+        scales: {
+          x: { display: false },
+          y: {
+            display: true,
+            ticks: {
+              maxTicksLimit: 4,
+              font: { size: 10 },
+              callback: v => formatValue(v, a.ticker),
+            },
+            grid: { color: 'rgba(0,0,0,.05)' },
+          },
+        },
+      },
+    });
+  });
+}
+
+function formatValue(val, ticker) {
+  if (val === null || val === undefined) return 'N/A';
+  // 10-yr treasury is a yield (percentage)
+  if (ticker === '^TNX') return val.toFixed(3) + '%';
+  // Gold in dollars – no abbreviation
+  if (val >= 1000) return '$' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return val.toFixed(2);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
