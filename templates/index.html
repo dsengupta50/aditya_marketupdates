@@ -34,6 +34,72 @@
       margin-bottom: 1.2rem;
     }
 
+    /* ── Trends ── */
+    .trends-section { margin-top: 1.4rem; }
+
+    .trends-title {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #555;
+      border-left: 4px solid #fd7e14;
+      padding-left: .6rem;
+      margin-bottom: .8rem;
+    }
+
+    .trend-item {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      background: #fff8f2;
+      border: 1px solid #fde8cc;
+      border-radius: 10px;
+      padding: .65rem .9rem;
+      margin-bottom: .6rem;
+    }
+
+    .trend-num {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: #fd7e14;
+      color: #fff;
+      border-radius: 50%;
+      font-size: .75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .trend-body { flex: 1; }
+
+    .trend-body .trend-title {
+      font-weight: 600;
+      font-size: .88rem;
+      color: #1a1a2e;
+      margin-bottom: .2rem;
+    }
+
+    .trend-body .trend-meta {
+      font-size: .75rem;
+      color: #999;
+      margin-bottom: .25rem;
+    }
+
+    .trend-body .trend-summary {
+      font-size: .83rem;
+      color: #555;
+      line-height: 1.45;
+    }
+
+    .trend-body .trend-link {
+      font-size: .78rem;
+      color: #fd7e14;
+      text-decoration: none;
+    }
+
+    .trend-body .trend-link:hover { text-decoration: underline; }
+
     /* ── News ── */
     .news-item {
       border-left: 3px solid var(--brand);
@@ -161,6 +227,11 @@
         <div id="news-results">
           <div class="empty-state">Enter a topic above to see the latest news.</div>
         </div>
+
+        <div id="trends-section" class="trends-section d-none">
+          <div class="trends-title">&#128200; Recent Trends</div>
+          <div id="trends-results"></div>
+        </div>
       </div>
     </div>
 
@@ -210,6 +281,7 @@ async function fetchNews() {
     }
 
     renderNews(data.articles);
+    renderTrends(data.trends || []);
   } catch (e) {
     setNewsState('error', 'Network error – please try again.');
   }
@@ -251,6 +323,33 @@ function summariseToBullets(body) {
     .join('');
 }
 
+function renderTrends(trends) {
+  const section = document.getElementById('trends-section');
+  const el      = document.getElementById('trends-results');
+
+  if (!trends || trends.length === 0) {
+    section.classList.add('d-none');
+    return;
+  }
+
+  section.classList.remove('d-none');
+  el.innerHTML = trends.map((t, i) => {
+    const snippet = t.body ? escHtml(t.body.slice(0, 120)) + (t.body.length > 120 ? '…' : '') : '';
+    const date    = t.date ? `<span class="me-2">${t.date.slice(0,10)}</span>` : '';
+    const src     = t.source ? `<span>${escHtml(t.source)}</span>` : '';
+    return `
+      <div class="trend-item">
+        <div class="trend-num">${i + 1}</div>
+        <div class="trend-body">
+          <div class="trend-title">${escHtml(t.title)}</div>
+          <div class="trend-meta">${date}${src}</div>
+          ${snippet ? `<div class="trend-summary">${snippet}</div>` : ''}
+          <a class="trend-link" href="${escHtml(t.url)}" target="_blank" rel="noopener">Read more &#8599;</a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function setNewsState(state, msg) {
   const spinner = document.getElementById('news-spinner');
   const errEl   = document.getElementById('news-error');
@@ -262,6 +361,8 @@ function setNewsState(state, msg) {
   if (state === 'loading') {
     spinner.style.display = 'block';
     results.innerHTML = '';
+    document.getElementById('trends-section').classList.add('d-none');
+    document.getElementById('trends-results').innerHTML = '';
   } else if (state === 'error') {
     errEl.textContent = msg;
     errEl.classList.remove('d-none');
