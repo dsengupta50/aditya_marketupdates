@@ -139,14 +139,13 @@ def get_news():
     if not topic:
         return jsonify({"error": "Please enter a topic."}), 400
 
-    business_query = f"{topic} business"
-    trends_query   = f"{topic} business trends"
+    trends_query = f"{topic} trends"
 
     articles = []
     trends   = []
     try:
         with DDGS() as ddgs:
-            for item in ddgs.news(business_query, max_results=5):
+            for item in ddgs.news(topic, max_results=5):
                 articles.append({
                     "title":  item.get("title", "No title"),
                     "body":   item.get("body", ""),
@@ -154,7 +153,7 @@ def get_news():
                     "source": item.get("source", ""),
                     "date":   item.get("date", ""),
                 })
-            for item in ddgs.news(trends_query, max_results=3):
+            for item in ddgs.news(trends_query, max_results=3, timelimit="w"):
                 trends.append({
                     "title":  item.get("title", "No title"),
                     "body":   item.get("body", ""),
@@ -166,7 +165,7 @@ def get_news():
         return jsonify({"error": f"Could not fetch news: {str(e)}"}), 500
 
     if not articles:
-        return jsonify({"error": "No business news found for this topic."}), 404
+        return jsonify({"error": "No news found for this topic."}), 404
 
     return jsonify({"articles": articles, "trends": trends})
 
