@@ -4,255 +4,608 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Market Updates</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
+    /* ── Base ── */
     :root {
-      --brand: #0d6efd;
-      --bg: #f4f6fb;
+      --brand:       #4f46e5;
+      --brand-light: #818cf8;
+      --brand-dark:  #3730a3;
+      --accent:      #f59e0b;
+      --accent-light:#fde68a;
+      --bg:          #f1f5f9;
+      --surface:     #ffffff;
+      --text-1:      #0f172a;
+      --text-2:      #475569;
+      --text-3:      #94a3b8;
+      --radius-lg:   20px;
+      --radius-md:   14px;
+      --radius-sm:   10px;
+      --shadow-sm:   0 1px 6px rgba(15,23,42,.07);
+      --shadow-md:   0 4px 24px rgba(15,23,42,.10);
+      --shadow-lg:   0 8px 40px rgba(15,23,42,.13);
     }
+
+    *, *::before, *::after { box-sizing: border-box; }
 
     body {
       background: var(--bg);
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text-1);
+      min-height: 100vh;
     }
 
-    .navbar-brand { font-weight: 700; font-size: 1.4rem; letter-spacing: .5px; }
-
-    .section-card {
-      border: none;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+    /* ── Navbar ── */
+    .app-header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      padding: 1rem 0;
+      box-shadow: 0 2px 20px rgba(67,56,202,.35);
     }
 
-    .section-title {
-      font-size: 1.1rem;
+    .app-header .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.3px;
+    }
+
+    .brand-icon {
+      width: 2rem;
+      height: 2rem;
+      background: linear-gradient(135deg, #818cf8, #c7d2fe);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .brand-sub {
+      font-size: .78rem;
+      font-weight: 400;
+      color: #a5b4fc;
+      margin-top: .1rem;
+    }
+
+    /* ── Sections ── */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255,255,255,.8);
+      padding: 1.75rem;
+      height: 100%;
+    }
+
+    .panel-title {
+      font-size: 1rem;
       font-weight: 700;
-      color: #333;
-      border-left: 4px solid var(--brand);
-      padding-left: .6rem;
-      margin-bottom: 1.2rem;
+      color: var(--text-1);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
     }
+
+    .panel-title-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+
+    .icon-blue  { background: #ede9fe; }
+    .icon-amber { background: #fef3c7; }
+    .icon-green { background: #dcfce7; }
+
+    /* ── Search ── */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-wrap input {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 50px;
+      padding: .65rem 1rem .65rem 2.6rem;
+      font-size: .9rem;
+      font-family: inherit;
+      color: var(--text-1);
+      background: #f8fafc;
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+      background: #fff;
+    }
+
+    .search-wrap .search-icon {
+      position: absolute;
+      left: .95rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: .9rem;
+      pointer-events: none;
+    }
+
+    .btn-search {
+      background: linear-gradient(135deg, var(--brand), var(--brand-light));
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: .6rem 1.4rem;
+      font-size: .88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      white-space: nowrap;
+    }
+
+    .btn-search:hover  { opacity: .9; transform: translateY(-1px); }
+    .btn-search:active { transform: translateY(0); }
+
+    .search-row {
+      display: flex;
+      gap: .6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-row .search-wrap { flex: 1; margin-bottom: 0; }
+
+    /* ── News items ── */
+    .news-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.1rem;
+      margin-bottom: .75rem;
+      transition: box-shadow .2s, transform .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .news-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(180deg, var(--brand), var(--brand-light));
+      border-radius: 3px 0 0 3px;
+    }
+
+    .news-item:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .news-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.4rem;
+      height: 1.4rem;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 50%;
+      font-size: .68rem;
+      font-weight: 700;
+      margin-right: .4rem;
+      flex-shrink: 0;
+    }
+
+    .news-title {
+      font-weight: 600;
+      font-size: .9rem;
+      color: var(--text-1);
+      margin-bottom: .3rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .3rem;
+      line-height: 1.4;
+    }
+
+    .news-meta {
+      font-size: .73rem;
+      color: var(--text-3);
+      margin-bottom: .5rem;
+      display: flex;
+      gap: .75rem;
+    }
+
+    .news-meta-dot {
+      width: 3px; height: 3px;
+      background: var(--text-3);
+      border-radius: 50%;
+      align-self: center;
+    }
+
+    .news-body {
+      font-size: .84rem;
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: .5rem;
+      padding-left: 1rem;
+    }
+
+    .news-body li { margin-bottom: .15rem; }
+
+    .news-link {
+      font-size: .78rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      transition: gap .15s;
+    }
+
+    .news-link:hover { gap: .45rem; }
 
     /* ── Trends ── */
-    .trends-section { margin-top: 1.4rem; }
+    .trends-section { margin-top: 1.5rem; }
 
-    .trends-title {
-      font-size: .9rem;
-      font-weight: 700;
-      color: #555;
-      border-left: 4px solid #fd7e14;
-      padding-left: .6rem;
-      margin-bottom: .8rem;
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+      margin-bottom: 1.25rem;
     }
 
     .trend-item {
       display: flex;
-      gap: .75rem;
+      gap: .8rem;
       align-items: flex-start;
-      background: #fff8f2;
-      border: 1px solid #fde8cc;
-      border-radius: 10px;
-      padding: .65rem .9rem;
+      background: linear-gradient(135deg, #fffbeb, #fef9ee);
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-md);
+      padding: .8rem 1rem;
       margin-bottom: .6rem;
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .trend-item:hover {
+      box-shadow: 0 4px 16px rgba(245,158,11,.15);
+      transform: translateY(-1px);
     }
 
     .trend-num {
       flex-shrink: 0;
-      width: 1.5rem;
-      height: 1.5rem;
-      background: #fd7e14;
+      width: 1.6rem;
+      height: 1.6rem;
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
       color: #fff;
       border-radius: 50%;
-      font-size: .75rem;
-      font-weight: 700;
+      font-size: .72rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 6px rgba(245,158,11,.35);
     }
 
-    .trend-body { flex: 1; }
+    .trend-body { flex: 1; min-width: 0; }
 
-    .trend-body .trend-title {
+    .trend-title {
       font-weight: 600;
-      font-size: .88rem;
-      color: #1a1a2e;
+      font-size: .86rem;
+      color: var(--text-1);
       margin-bottom: .2rem;
+      line-height: 1.4;
     }
 
-    .trend-body .trend-meta {
-      font-size: .75rem;
-      color: #999;
-      margin-bottom: .25rem;
-    }
-
-    .trend-body .trend-summary {
-      font-size: .83rem;
-      color: #555;
-      line-height: 1.45;
-    }
-
-    .trend-body .trend-link {
-      font-size: .78rem;
-      color: #fd7e14;
-      text-decoration: none;
-    }
-
-    .trend-body .trend-link:hover { text-decoration: underline; }
-
-    /* ── News ── */
-    .news-item {
-      border-left: 3px solid var(--brand);
-      padding: .75rem 1rem;
-      background: #fff;
-      border-radius: 0 10px 10px 0;
-      margin-bottom: .9rem;
-    }
-
-    .news-item .news-title {
-      font-weight: 600;
-      font-size: .95rem;
-      color: #1a1a2e;
+    .trend-meta {
+      font-size: .72rem;
+      color: var(--text-3);
       margin-bottom: .3rem;
     }
 
-    .news-item .news-meta {
-      font-size: .78rem;
-      color: #888;
-      margin-bottom: .4rem;
-    }
-
-    .news-item .news-body {
-      font-size: .88rem;
-      color: #444;
+    .trend-summary {
+      font-size: .81rem;
+      color: var(--text-2);
       line-height: 1.5;
+      margin-bottom: .3rem;
     }
 
-    .news-item .news-link {
-      font-size: .82rem;
+    .trend-link {
+      font-size: .76rem;
+      font-weight: 600;
+      color: #d97706;
       text-decoration: none;
-      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      transition: gap .15s;
     }
 
-    .news-item .news-link:hover { text-decoration: underline; }
+    .trend-link:hover { gap: .4rem; }
 
-    /* ── Market ── */
+    /* ── Market asset cards ── */
     .asset-card {
-      border: none;
-      border-radius: 14px;
-      background: #fff;
-      box-shadow: 0 1px 8px rgba(0,0,0,.07);
-      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
       height: 100%;
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .asset-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: .5rem;
     }
 
     .asset-name {
       font-weight: 700;
-      font-size: .95rem;
-      color: #333;
+      font-size: .88rem;
+      color: var(--text-1);
+    }
+
+    .asset-ticker {
+      font-size: .7rem;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: .1rem;
     }
 
     .asset-value {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin: .15rem 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -.5px;
+      margin: .3rem 0 .4rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    .badge-up   { background: #d4edda; color: #155724; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
-    .badge-down { background: #f8d7da; color: #721c24; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
-    .badge-flat { background: #e2e3e5; color: #383d41; font-size: .82rem; border-radius: 20px; padding: .3rem .65rem; }
+    .pct-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .2rem;
+      font-size: .78rem;
+      font-weight: 700;
+      border-radius: 50px;
+      padding: .25rem .65rem;
+    }
 
-    .chart-container { position: relative; height: 130px; margin-top: .6rem; }
+    .pct-up   { background: #dcfce7; color: #166534; }
+    .pct-down { background: #fee2e2; color: #991b1b; }
+    .pct-flat { background: #f1f5f9; color: #475569; }
+
+    .src-badge {
+      font-size: .67rem;
+      font-weight: 600;
+      border-radius: 50px;
+      padding: .2rem .55rem;
+    }
+
+    .src-live  { background: #dcfce7; color: #166534; }
+    .src-spot  { background: #fef3c7; color: #92400e; }
+    .src-stale { background: #fee2e2; color: #991b1b; }
+
+    .data-ts {
+      font-size: .68rem;
+      color: var(--text-3);
+      margin-top: .3rem;
+    }
+
+    .chart-container { position: relative; height: 120px; margin-top: .7rem; }
 
     .no-chart-msg {
-      height: 130px;
-      margin-top: .6rem;
+      height: 120px;
+      margin-top: .7rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: .78rem;
-      color: #aaa;
-      border: 1px dashed #ddd;
-      border-radius: 8px;
+      font-size: .75rem;
+      color: var(--text-3);
+      border: 1.5px dashed #e2e8f0;
+      border-radius: var(--radius-sm);
+      background: #f8fafc;
     }
 
-    .badge-live  { background: #d4edda; color: #155724; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
-    .badge-spot  { background: #fff3cd; color: #856404; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
-    .badge-stale { background: #f8d7da; color: #721c24; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
+    /* ── Refresh button ── */
+    .btn-refresh {
+      background: #f1f5f9;
+      color: var(--brand);
+      border: 1.5px solid #e2e8f0;
+      border-radius: 50px;
+      padding: .45rem 1rem;
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      transition: background .2s, border-color .2s, transform .15s;
+    }
 
-    .data-ts { font-size: .72rem; color: #999; margin-top: .25rem; }
+    .btn-refresh:hover {
+      background: #ede9fe;
+      border-color: var(--brand-light);
+      transform: translateY(-1px);
+    }
 
+    /* ── Spinners / empty ── */
     #market-spinner, #news-spinner { display: none; }
+
+    .spinner-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .75rem;
+      padding: 2.5rem 0;
+    }
+
+    .spinner-ring {
+      width: 2rem; height: 2rem;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spinner-label {
+      font-size: .82rem;
+      color: var(--text-3);
+      font-weight: 500;
+    }
 
     .empty-state {
       text-align: center;
-      color: #aaa;
-      padding: 2rem 0;
-      font-size: .95rem;
+      color: var(--text-3);
+      padding: 2.5rem 1rem;
+      font-size: .9rem;
+      line-height: 1.6;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2.2rem;
+      margin-bottom: .75rem;
+      display: block;
+    }
+
+    /* ── Fade-in animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .news-item, .trend-item, .asset-card {
+      animation: fadeUp .3s ease both;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 576px) {
+      .panel { padding: 1.2rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-dark bg-primary mb-4">
+<!-- Header -->
+<header class="app-header mb-4">
   <div class="container">
-    <span class="navbar-brand">&#128200; Market Updates</span>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="brand">
+        <div class="brand-icon">📈</div>
+        <div>
+          Market Updates
+          <div class="brand-sub">Real-time data &amp; news</div>
+        </div>
+      </div>
+    </div>
   </div>
-</nav>
+</header>
 
 <div class="container pb-5">
   <div class="row g-4">
 
-    <!-- ════════════════ LEFT: NEWS ════════════════ -->
+    <!-- ════════════ LEFT: NEWS + TRENDS ════════════ -->
     <div class="col-lg-5">
-      <div class="card section-card p-4 h-100">
-        <h5 class="section-title">Top 5 News</h5>
+      <div class="panel">
 
-        <div class="input-group mb-3">
-          <input id="news-topic" type="text" class="form-control"
-                 placeholder="Enter a topic (e.g. AI, Bitcoin, Fed…)"
-                 onkeydown="if(event.key==='Enter') fetchNews()" />
-          <button class="btn btn-primary" onclick="fetchNews()">Search</button>
+        <div class="panel-title">
+          <div class="panel-title-icon icon-blue">📰</div>
+          Top 5 News
         </div>
 
-        <div id="news-spinner" class="text-center py-3">
-          <div class="spinner-border text-primary" role="status"></div>
-          <div class="mt-2 text-muted small">Fetching news…</div>
+        <div class="search-row">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input id="news-topic" type="text"
+                   placeholder="Search a topic — AI, Bitcoin, Fed…"
+                   onkeydown="if(event.key==='Enter') fetchNews()" />
+          </div>
+          <button class="btn-search" onclick="fetchNews()">
+            Search
+          </button>
         </div>
 
-        <div id="news-error" class="alert alert-danger d-none"></div>
+        <div id="news-spinner">
+          <div class="spinner-wrap">
+            <div class="spinner-ring"></div>
+            <span class="spinner-label">Fetching news…</span>
+          </div>
+        </div>
+
+        <div id="news-error" class="alert alert-danger d-none" style="border-radius:var(--radius-sm);font-size:.85rem;"></div>
 
         <div id="news-results">
-          <div class="empty-state">Enter a topic above to see the latest news.</div>
+          <div class="empty-state">
+            <span class="empty-icon">🗞️</span>
+            Enter a topic above to load the latest headlines.
+          </div>
         </div>
 
         <div id="trends-section" class="trends-section d-none">
-          <div class="trends-title">&#128200; Recent Trends</div>
+          <div class="divider"></div>
+          <div class="panel-title" style="margin-bottom:.9rem;">
+            <div class="panel-title-icon icon-amber">🔥</div>
+            Recent Trends
+          </div>
           <div id="trends-results"></div>
         </div>
+
       </div>
     </div>
 
-    <!-- ════════════════ RIGHT: MARKET ════════════════ -->
+    <!-- ════════════ RIGHT: MARKET ════════════ -->
     <div class="col-lg-7">
-      <div class="card section-card p-4">
+      <div class="panel">
+
         <div class="d-flex align-items-center justify-content-between mb-3">
-          <h5 class="section-title mb-0">Daily Market Overview</h5>
-          <button class="btn btn-sm btn-outline-primary" onclick="fetchMarket()">&#8635; Refresh</button>
+          <div class="panel-title mb-0">
+            <div class="panel-title-icon icon-green">📊</div>
+            Daily Market Overview
+          </div>
+          <button class="btn-refresh" onclick="fetchMarket()">
+            ↻ Refresh
+          </button>
         </div>
 
-        <div id="market-spinner" class="text-center py-3">
-          <div class="spinner-border text-primary" role="status"></div>
-          <div class="mt-2 text-muted small">Loading market data…</div>
+        <div id="market-spinner">
+          <div class="spinner-wrap">
+            <div class="spinner-ring"></div>
+            <span class="spinner-label">Loading market data…</span>
+          </div>
         </div>
 
-        <div id="market-error" class="alert alert-danger d-none"></div>
+        <div id="market-error" class="alert alert-danger d-none" style="border-radius:var(--radius-sm);font-size:.85rem;"></div>
 
         <div id="market-results">
-          <div class="empty-state">Click <strong>Refresh</strong> to load today's market data.</div>
+          <div class="empty-state">
+            <span class="empty-icon">💹</span>
+            Click <strong>Refresh</strong> to load today's market data.
+          </div>
         </div>
+
       </div>
     </div>
 
@@ -293,21 +646,24 @@ function renderNews(articles) {
   document.getElementById('news-error').classList.add('d-none');
 
   if (!articles || articles.length === 0) {
-    el.innerHTML = '<div class="empty-state">No articles found.</div>';
+    el.innerHTML = '<div class="empty-state"><span class="empty-icon">🔎</span>No articles found.</div>';
     return;
   }
 
   el.innerHTML = articles.map((a, i) => {
     const bullets = summariseToBullets(a.body);
-    const date    = a.date ? `<span class="me-2">${a.date.slice(0,10)}</span>` : '';
-    const src     = a.source ? `<span>${a.source}</span>` : '';
+    const date    = a.date   ? `<span>${a.date.slice(0,10)}</span>` : '';
+    const src     = a.source ? `<><span class="news-meta-dot"></span><span>${escHtml(a.source)}</span>` : '';
     return `
-      <div class="news-item">
-        <div class="news-title">${i+1}. ${escHtml(a.title)}</div>
+      <div class="news-item" style="animation-delay:${i * 60}ms">
+        <div class="news-title">
+          <span class="news-num">${i+1}</span>
+          ${escHtml(a.title)}
+        </div>
         <div class="news-meta">${date}${src}</div>
         <ul class="news-body mb-1">${bullets}</ul>
         <a class="news-link" href="${escHtml(a.url)}" target="_blank" rel="noopener">
-          &#128279; Read full article
+          Read full article →
         </a>
       </div>`;
   }).join('');
@@ -315,7 +671,6 @@ function renderNews(articles) {
 
 function summariseToBullets(body) {
   if (!body) return '<li>No summary available.</li>';
-  // Split on sentence boundaries, keep up to 3 meaningful sentences as bullets
   const sentences = body.match(/[^.!?]+[.!?]+/g) || [body];
   return sentences
     .slice(0, 3)
@@ -334,17 +689,18 @@ function renderTrends(trends) {
 
   section.classList.remove('d-none');
   el.innerHTML = trends.map((t, i) => {
-    const snippet = t.body ? escHtml(t.body.slice(0, 120)) + (t.body.length > 120 ? '…' : '') : '';
-    const date    = t.date ? `<span class="me-2">${t.date.slice(0,10)}</span>` : '';
-    const src     = t.source ? `<span>${escHtml(t.source)}</span>` : '';
+    const snippet = t.body ? escHtml(t.body.slice(0, 130)) + (t.body.length > 130 ? '…' : '') : '';
+    const date    = t.date   ? `${t.date.slice(0,10)}` : '';
+    const src     = t.source ? `${escHtml(t.source)}` : '';
+    const meta    = [date, src].filter(Boolean).join(' · ');
     return `
-      <div class="trend-item">
+      <div class="trend-item" style="animation-delay:${i * 60}ms">
         <div class="trend-num">${i + 1}</div>
         <div class="trend-body">
           <div class="trend-title">${escHtml(t.title)}</div>
-          <div class="trend-meta">${date}${src}</div>
+          ${meta ? `<div class="trend-meta">${meta}</div>` : ''}
           ${snippet ? `<div class="trend-summary">${snippet}</div>` : ''}
-          <a class="trend-link" href="${escHtml(t.url)}" target="_blank" rel="noopener">Read more &#8599;</a>
+          <a class="trend-link" href="${escHtml(t.url)}" target="_blank" rel="noopener">Read more →</a>
         </div>
       </div>`;
   }).join('');
@@ -381,7 +737,6 @@ async function fetchMarket() {
   errEl.classList.add('d-none');
   results.innerHTML = '';
 
-  // Destroy existing charts
   Object.values(chartInstances).forEach(c => c.destroy());
   Object.keys(chartInstances).forEach(k => delete chartInstances[k]);
 
@@ -408,45 +763,46 @@ async function fetchMarket() {
 function renderMarket(assets) {
   const results = document.getElementById('market-results');
 
-  const cards = assets.map(a => {
+  const cards = assets.map((a, idx) => {
     const cid = `chart-${a.ticker.replace(/[^a-z0-9]/gi,'_')}`;
 
     if (a.error) {
       return `
         <div class="col-sm-6 col-xl-4">
-          <div class="asset-card">
+          <div class="asset-card" style="animation-delay:${idx*60}ms">
             <div class="asset-name">${escHtml(a.name)}</div>
-            <div class="text-muted small">Data unavailable from all sources</div>
+            <div style="font-size:.8rem;color:var(--text-3);margin-top:.4rem;">Data unavailable</div>
           </div>
         </div>`;
     }
 
     const pct    = a.pct_change;
-    const arrow  = pct === null ? '' : (pct >= 0 ? '▲' : '▼');
-    const cls    = pct === null ? 'badge-flat' : (pct >= 0 ? 'badge-up' : 'badge-down');
-    const pctTxt = pct === null ? 'N/A' : `${arrow} ${Math.abs(pct)}%`;
+    const arrow  = pct === null ? '' : (pct >= 0 ? '▲ ' : '▼ ');
+    const pctCls = pct === null ? 'pct-flat' : (pct >= 0 ? 'pct-up' : 'pct-down');
+    const pctTxt = pct === null ? 'N/A' : `${arrow}${Math.abs(pct)}%`;
 
-    const latestFmt = formatValue(a.latest, a.ticker);
-
-    const srcLabel = a.stale   ? 'Last Known'  : (a.source === 'stooq' ? 'Spot Quote' : 'Live');
-    const srcCls   = a.stale   ? 'badge-stale' : (a.source === 'stooq' ? 'badge-spot'  : 'badge-live');
+    const srcLabel = a.stale ? 'Cached' : (a.source === 'stooq' ? 'Spot' : 'Live');
+    const srcCls   = a.stale ? 'src-stale' : (a.source === 'stooq' ? 'src-spot' : 'src-live');
     const tsLine   = a.fetched_at
-      ? `<div class="data-ts">As of: ${escHtml(formatTimestamp(a.fetched_at))}</div>`
+      ? `<div class="data-ts">Updated ${escHtml(formatTimestamp(a.fetched_at))}</div>`
       : '';
 
     const chartHtml = (a.prices && a.prices.length > 0)
       ? `<div class="chart-container"><canvas id="${cid}"></canvas></div>`
-      : `<div class="no-chart-msg">No intraday chart available</div>`;
+      : `<div class="no-chart-msg">No intraday data</div>`;
 
     return `
-      <div class="col-sm-6 col-xl-4">
+      <div class="col-sm-6 col-xl-4" style="animation-delay:${idx*60}ms">
         <div class="asset-card">
-          <div class="d-flex justify-content-between align-items-start mb-1">
-            <div class="asset-name">${escHtml(a.name)}</div>
-            <span class="${srcCls}">${srcLabel}</span>
+          <div class="asset-header">
+            <div>
+              <div class="asset-name">${escHtml(a.name)}</div>
+              <div class="asset-ticker">${escHtml(a.ticker)}</div>
+            </div>
+            <span class="src-badge ${srcCls}">${srcLabel}</span>
           </div>
-          <div class="asset-value">${latestFmt}</div>
-          <span class="${cls}">${pctTxt} today</span>
+          <div class="asset-value">${formatValue(a.latest, a.ticker)}</div>
+          <span class="pct-badge ${pctCls}">${pctTxt} today</span>
           ${tsLine}
           ${chartHtml}
         </div>
@@ -455,17 +811,16 @@ function renderMarket(assets) {
 
   results.innerHTML = `<div class="row g-3">${cards}</div>`;
 
-  // Draw charts after DOM update
   assets.forEach(a => {
     if (a.error || !a.prices || a.prices.length === 0) return;
 
-    const cid  = `chart-${a.ticker.replace(/[^a-z0-9]/gi,'_')}`;
+    const cid    = `chart-${a.ticker.replace(/[^a-z0-9]/gi,'_')}`;
     const canvas = document.getElementById(cid);
     if (!canvas) return;
 
     const up    = a.pct_change === null || a.pct_change >= 0;
-    const color = up ? '#198754' : '#dc3545';
-    const fill  = up ? 'rgba(25,135,84,.12)' : 'rgba(220,53,69,.12)';
+    const color = up ? '#16a34a' : '#dc2626';
+    const fill  = up ? 'rgba(22,163,74,.1)' : 'rgba(220,38,38,.1)';
 
     chartInstances[cid] = new Chart(canvas, {
       type: 'line',
@@ -478,27 +833,28 @@ function renderMarket(assets) {
           borderWidth:     2,
           pointRadius:     0,
           fill:            true,
-          tension:         0.3,
+          tension:         0.4,
         }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: {
-          callbacks: {
-            label: ctx => formatValue(ctx.parsed.y, a.ticker),
-          }
-        }},
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => formatValue(ctx.parsed.y, a.ticker) } },
+        },
         scales: {
           x: { display: false },
           y: {
             display: true,
             ticks: {
               maxTicksLimit: 4,
-              font: { size: 10 },
+              font: { size: 10, family: 'Inter' },
+              color: '#94a3b8',
               callback: v => formatValue(v, a.ticker),
             },
-            grid: { color: 'rgba(0,0,0,.05)' },
+            grid: { color: 'rgba(0,0,0,.04)' },
+            border: { display: false },
           },
         },
       },
@@ -508,9 +864,7 @@ function renderMarket(assets) {
 
 function formatValue(val, ticker) {
   if (val === null || val === undefined) return 'N/A';
-  // 10-yr treasury is a yield (percentage)
   if (ticker === '^TNX') return val.toFixed(3) + '%';
-  // Gold in dollars – no abbreviation
   if (val >= 1000) return '$' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   return val.toFixed(2);
 }
@@ -519,10 +873,8 @@ function formatTimestamp(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleString(undefined, {
-    month:  'short',
-    day:    'numeric',
-    hour:   '2-digit',
-    minute: '2-digit',
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
     timeZoneName: 'short',
   });
 }
