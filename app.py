@@ -19,7 +19,8 @@ _market_cache: dict = {}
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    """Return current UTC time as an ISO 8601 string parseable by JS Date."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _fetch_yfinance(asset: dict) -> dict | None:

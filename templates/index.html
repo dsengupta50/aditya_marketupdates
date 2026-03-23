@@ -330,7 +330,7 @@ function renderMarket(assets) {
     const srcLabel = a.stale   ? 'Last Known'  : (a.source === 'stooq' ? 'Spot Quote' : 'Live');
     const srcCls   = a.stale   ? 'badge-stale' : (a.source === 'stooq' ? 'badge-spot'  : 'badge-live');
     const tsLine   = a.fetched_at
-      ? `<div class="data-ts">As of: ${escHtml(a.fetched_at)}</div>`
+      ? `<div class="data-ts">As of: ${escHtml(formatTimestamp(a.fetched_at))}</div>`
       : '';
 
     const chartHtml = (a.prices && a.prices.length > 0)
@@ -412,6 +412,18 @@ function formatValue(val, ticker) {
   // Gold in dollars – no abbreviation
   if (val >= 1000) return '$' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   return val.toFixed(2);
+}
+
+function formatTimestamp(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    month:  'short',
+    day:    'numeric',
+    hour:   '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
 }
 
 function escHtml(str) {
