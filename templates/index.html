@@ -99,6 +99,24 @@
 
     .chart-container { position: relative; height: 130px; margin-top: .6rem; }
 
+    .no-chart-msg {
+      height: 130px;
+      margin-top: .6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .78rem;
+      color: #aaa;
+      border: 1px dashed #ddd;
+      border-radius: 8px;
+    }
+
+    .badge-live  { background: #d4edda; color: #155724; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
+    .badge-spot  { background: #fff3cd; color: #856404; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
+    .badge-stale { background: #f8d7da; color: #721c24; font-size: .72rem; border-radius: 20px; padding: .2rem .55rem; }
+
+    .data-ts { font-size: .72rem; color: #999; margin-top: .25rem; }
+
     #market-spinner, #news-spinner { display: none; }
 
     .empty-state {
@@ -297,27 +315,39 @@ function renderMarket(assets) {
         <div class="col-sm-6 col-xl-4">
           <div class="asset-card">
             <div class="asset-name">${escHtml(a.name)}</div>
-            <div class="text-muted small">Data unavailable</div>
+            <div class="text-muted small">Data unavailable from all sources</div>
           </div>
         </div>`;
     }
 
-    const pct   = a.pct_change;
-    const arrow = pct === null ? '' : (pct >= 0 ? '▲' : '▼');
-    const cls   = pct === null ? 'badge-flat' : (pct >= 0 ? 'badge-up' : 'badge-down');
+    const pct    = a.pct_change;
+    const arrow  = pct === null ? '' : (pct >= 0 ? '▲' : '▼');
+    const cls    = pct === null ? 'badge-flat' : (pct >= 0 ? 'badge-up' : 'badge-down');
     const pctTxt = pct === null ? 'N/A' : `${arrow} ${Math.abs(pct)}%`;
 
     const latestFmt = formatValue(a.latest, a.ticker);
 
+    const srcLabel = a.stale   ? 'Last Known'  : (a.source === 'stooq' ? 'Spot Quote' : 'Live');
+    const srcCls   = a.stale   ? 'badge-stale' : (a.source === 'stooq' ? 'badge-spot'  : 'badge-live');
+    const tsLine   = a.fetched_at
+      ? `<div class="data-ts">As of: ${escHtml(a.fetched_at)}</div>`
+      : '';
+
+    const chartHtml = (a.prices && a.prices.length > 0)
+      ? `<div class="chart-container"><canvas id="${cid}"></canvas></div>`
+      : `<div class="no-chart-msg">No intraday chart available</div>`;
+
     return `
       <div class="col-sm-6 col-xl-4">
         <div class="asset-card">
-          <div class="asset-name">${escHtml(a.name)}</div>
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <div class="asset-name">${escHtml(a.name)}</div>
+            <span class="${srcCls}">${srcLabel}</span>
+          </div>
           <div class="asset-value">${latestFmt}</div>
           <span class="${cls}">${pctTxt} today</span>
-          <div class="chart-container">
-            <canvas id="${cid}"></canvas>
-          </div>
+          ${tsLine}
+          ${chartHtml}
         </div>
       </div>`;
   }).join('');
