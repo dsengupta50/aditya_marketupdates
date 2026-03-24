@@ -568,7 +568,14 @@
           <div class="divider"></div>
           <div class="panel-title" style="margin-bottom:.9rem;">
             <div class="panel-title-icon icon-amber">🔥</div>
-            Recent Trends
+            <span id="trends-section-title">Key Trends</span>
+            <span id="trends-ai-badge" class="d-none" style="
+              margin-left:.5rem;font-size:.65rem;font-weight:700;
+              background:linear-gradient(135deg,#4f46e5,#818cf8);
+              color:#fff;border-radius:50px;padding:.2rem .6rem;
+              letter-spacing:.3px;vertical-align:middle;">
+              ✦ AI Synthesized
+            </span>
           </div>
           <div id="trends-results"></div>
         </div>
@@ -679,19 +686,29 @@ function summariseToBullets(body) {
 }
 
 function renderTrends(trends) {
-  const section = document.getElementById('trends-section');
-  const el      = document.getElementById('trends-results');
+  const section   = document.getElementById('trends-section');
+  const el        = document.getElementById('trends-results');
+  const titleEl   = document.getElementById('trends-section-title');
+  const aiBadgeEl = document.getElementById('trends-ai-badge');
 
   if (!trends || trends.length === 0) {
     section.classList.add('d-none');
     return;
   }
 
+  const isAI = trends.some(t => t.ai_compiled);
+  titleEl.textContent = isAI ? 'AI-Synthesized Trends' : 'Key Trends';
+  isAI ? aiBadgeEl.classList.remove('d-none') : aiBadgeEl.classList.add('d-none');
+
   section.classList.remove('d-none');
   el.innerHTML = trends.map((t, i) => {
-    const snippet = t.body ? escHtml(t.body.slice(0, 130)) + (t.body.length > 130 ? '…' : '') : '';
-    const date    = t.date   ? `${t.date.slice(0,10)}` : '';
-    const src     = t.source ? `${escHtml(t.source)}` : '';
+    // Show full summary for AI-compiled trends; truncate for simple ones
+    const maxLen  = t.ai_compiled ? 500 : 160;
+    const snippet = t.body
+      ? escHtml(t.body.slice(0, maxLen)) + (t.body.length > maxLen ? '…' : '')
+      : '';
+    const date    = t.date   ? `${String(t.date).slice(0,10)}` : '';
+    const src     = t.source ? escHtml(t.source) : '';
     const meta    = [date, src].filter(Boolean).join(' · ');
     return `
       <div class="trend-item" style="animation-delay:${i * 60}ms">
